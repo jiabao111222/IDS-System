@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Wallet Login</title>
+    <link rel="icon" href="1345884.svg" type="image/x-icon">
+    <style>
+      body {
+                font-family: Arial, sans-serif;
+                background-image: url('background.png'); /* 替换为你的图片路径 */
+                background-size: cover; /* 确保图片覆盖整个背景 */
+                background-position: center; /* 使图片居中 */
+                background-repeat: no-repeat; /* 防止图片重复 */
+                background-size: cover;
+                margin: 0;
+                padding: 20px;
+                min-height: 100vh;
+        }
+
+        .captcha-container {
+            display: none;
+            position: absolute;
+            top: 700px;
+            left: 170px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: rgb(252, 252, 252);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            height: 850px;
+            position: relative; 
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-top: 110px;  
+        }
+
+        h3 {
+            text-align: center;
+            font-size: 15px;
+        }
+       
+        img {
+            display: block;
+            margin: 0 auto;
+        }
+
+        h5 {
+            position: absolute;
+            top: 0;
+            left: 0;
+            margin: 0;
+            padding: 10px;
+            color: #333;
+            font-size: 20px;
+            text-align: left;
+            font-family: 'Segoe UI';
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); 
+        }
+
+        input[type="file"] {
+            display: block;
+            margin: 20px auto;
+            margin-top: 100px;
+        }
+
+        .file-name {
+            text-align: center;
+            font-size: 16px;
+            color: #555;
+        }
+
+        button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            color: white;
+            background-color: #4CAF50;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 20px;
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        button.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .icon-container {
+            width: 150px;
+            height: 150px;
+            position: relative;
+            perspective: 1000px;
+            left: 38%;
+            top: 10%;
+        }
+
+        .fox-icon {
+            width: 100%;
+            height: 100%;
+            background-image: url('1345884.svg');
+            background-size: cover;
+            background-position: center;
+            position: absolute;
+            transition: transform 0.2s;
+            transform-style: preserve-3d;
+            animation: spin 10s infinite linear;
+        }
+
+        .lottie-container {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #lottieAnimation {
+            width: 400px;
+            height: 400px;
+        }
+
+        @keyframes spin {
+            from {
+                transform: rotateY(0deg);
+            }
+            to {
+                transform: rotateY(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h5>Wallet Login</h5>
+
+        <div class="icon-container">
+            <div class="fox-icon" id="foxIcon"></div>
+        </div>
+
+        <div class="captcha-container">
+            <div class="g-recaptcha" data-sitekey="6LeM8jcqAAAAAFWJ3lO11jKypVlg9UCzjdKLWEka" data-callback="onCaptchaSuccess"></div>
+        </div>
+
+        <h1>Welcome Back !!</h1>
+        <h3>Upload the QR code to login to your Web3 wallet</h3>
+        
+        <img id="preview" src="" alt="QR" width="100">
+        <input type="file" id="qr-upload" />
+        <p class="file-name" id="file-name">No file chosen</p>
+        <button id="submit">Submit</button>
+        
+        <div class="lottie-container" id="lottieContainer">
+            <div id="lottieAnimation"></div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.7.14/lottie.min.js"></script>
+    <script>
+        const MAX_FILE_SIZE = 2 * 1024 * 1024; // Maximum file size 2MB
+        let captchaVerified = false; // Global variable to track captcha verification
+
+        document.getElementById('qr-upload').addEventListener('change', function(event) {
+            var file = event.target.files[0];
+            var fileName = file ? file.name : 'No file chosen';
+
+            if (file) {
+                if (file.size > MAX_FILE_SIZE) {
+                    alert('File is too large. Please upload a file smaller than 2MB.');
+                    document.getElementById('file-name').textContent = 'File too large';
+                    document.getElementById('submit').classList.remove('active');
+                    document.getElementById('preview').src = '';
+                    logError('Large File Detected', 'Upload Failed');
+                    return;
+                }
+
+                if (file.type.startsWith('image/')) {
+                    var reader = new FileReader();
+                    reader.onload = function(e) {
+                        document.getElementById('preview').src = e.target.result;
+                    }
+                    reader.readAsDataURL(file);
+                    document.getElementById('file-name').textContent = `Confirm submit [${fileName}]?`;
+                    document.getElementById('submit').classList.add('active');
+                } else {
+                    document.getElementById('preview').src = '';
+                    document.getElementById('file-name').textContent = 'Invalid file type';
+                    document.getElementById('submit').classList.remove('active');
+                    logError('Invalid File Type', 'Upload Failed');
+                }
+            } else {
+                document.getElementById('file-name').textContent = fileName;
+                document.getElementById('submit').classList.remove('active');
+            }
+        });
+
+        document.addEventListener('mousemove', function(event) {
+            const icon = document.getElementById('foxIcon');
+            const x = event.clientX;
+            const y = event.clientY;
+            const centerX = window.innerWidth / 2;
+            const centerY = window.innerHeight / 2;
+            const rotateX = ((y - centerY) / centerY) * 20;
+            const rotateY = ((x - centerX) / centerX) * -20;
+            icon.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+        });
+
+        let lottieAnim;
+
+        document.getElementById('submit').addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            if (!this.classList.contains('active')) {
+                alert('Please confirm your account QR code');
+                return;
+            }
+
+            if (captchaVerified) {
+                showLottieAnimation();
+                setTimeout(() => {
+                    hideLottieAnimation();
+                    submitForm();
+                }, 2000);
+            } else {
+                document.querySelector('.captcha-container').style.display = 'block';
+            }
+        });
+
+        function showLottieAnimation() {
+            const container = document.getElementById('lottieContainer');
+            container.style.display = 'flex';
+            lottieAnim = lottie.loadAnimation({
+                container: document.getElementById('lottieAnimation'),
+                renderer: 'svg',
+                loop: true,
+                autoplay: true,
+                path: 'Animation - 1725924591648.json'
+            });
+        }
+
+        function hideLottieAnimation() {
+            const container = document.getElementById('lottieContainer');
+            container.style.display = 'none';
+            if (lottieAnim) {
+                lottieAnim.destroy();
+            }
+        }
+
+        function onCaptchaSuccess(token) {
+            captchaVerified = true; // Update captcha status
+            showLottieAnimation();
+            
+            setTimeout(() => {
+                hideLottieAnimation();
+                submitForm();
+            }, 2000);
+        }
+
+        function submitForm() {
+            var fileInput = document.getElementById('qr-upload');
+            var file = fileInput.files[0];
+            var formData = new FormData();
+            formData.append('file', file);
+
+            fetch('https://api.qrserver.com/v1/read-qr-code/', {
+                method: 'POST',
+                body: formData
+            }).then(response => {
+                if (!response.ok) {
+                    throw new Error('Error fetching QR code data: ' + response.statusText);
+                }
+                return response.json();
+            }).then(result => {
+                console.log('QR Code Decoding Result:', result);
+                let decodedData = result[0]?.symbol[0]?.data || '';
+                console.log('Decoded Data:', decodedData);
+                if (decodedData.startsWith('Encryp')) {
+                    window.location.href = 'http://localhost:8000/Dashboard.html';
+                } else {
+                    alert('Invalid QR code. Please check the QR code and try again.');
+                    logError('Invalid QR Code', 'Error QR Code');
+                }
+            }).catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while uploading the file.');
+                logError('File Upload Error', 'Upload Failed');
+            });
+        }
+
+        function logError(event, catchValue) {
+            fetch('http://localhost:8000/writein.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: new URLSearchParams({
+                    'event': event,
+                    'catch': catchValue,
+                    'ip': '',
+                    'status': 'Failed'
+                })
+            }).catch(error => {
+                console.error('Failed to log error:', error);
+            });
+        }
+    </script>
+
+    <script src="https://www.google.com/recaptcha/api.js?hl=en" async defer></script>
+</body>
+</html>

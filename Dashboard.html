@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web3 Wallet</title>
+    <link rel="icon" href="1345884.svg" type="image/x-icon">
+    
+    <style>
+        h1 {
+            color: #7ca50a;
+            
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #000000;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            height: 850px;
+            position: relative;
+        }
+
+        img {
+            display: block;
+            margin: 0 auto; /* Center the image */
+        }
+
+        .wallet-address {
+            background-color: #f8f8f8;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #555;
+            text-align: center;
+        }
+
+        .total-assets {
+            text-align: center;
+            font-size: 24px;
+            margin: 40px 0;
+        }
+
+        .coin-list {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .coin-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .action-buttons {
+            display: flex;
+            justify-content: space-between;
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+        }
+
+        .action-btn {
+            width: 30%;
+            padding: 15px 0;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .icon-container {
+            width: 150px; /* Increased size for better visibility */
+            height: 150px; /* Increased size for better visibility */
+            position: relative;
+            perspective: 1000px; /* Add perspective for 3D effect */
+            left: 38%; /* Center horizontally */
+            top: 1%;
+        }
+
+        .fox-icon {
+            width: 100%;
+            height: 100%;
+            background-image: url('1345884.svg'); /* 修改为相对路径 */
+            background-size: cover;
+            background-position: center;
+            position: absolute;
+            transition: transform 0.2s;
+            transform-style: preserve-3d;
+            animation: spin 10s infinite linear; /* Continuous rotation */
+        }
+
+        @keyframes spin {
+            from {
+                transform: rotateY(0deg);
+            }
+            to {
+                transform: rotateY(360deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="wallet-address">
+            <b>Account 1:</b> 0xyvy1321......7yhb
+        </div>
+        
+        <h3>My Web3 Wallet</h3>
+        
+        <div class="icon-container">
+            <div class="fox-icon" id="foxIcon"></div>
+        </div>
+
+        <div class="total-assets">
+            <h2>Total Assets</h2>
+            <h1>$1,234.56 USD</h1>
+        </div>
+        
+        <h3>Coins</h3>
+        <ul class="coin-list">
+            <li class="coin-item">
+                <span>ETH</span>
+                <span>0.5 ETH ($900.00 USD)</span>
+            </li>
+            <li class="coin-item">
+                <span>BTC</span>
+                <span>0.01 BTC ($300.00 USD)</span>
+            </li>
+            <li class="coin-item">
+                <span>USDC</span>
+                <span>34.56 USDC ($34.56 USD)</span>
+            </li>
+        </ul>
+        
+        <div class="action-buttons">
+            <button class="action-btn">Transfer</button>
+            <button class="action-btn">Send</button>
+            <button class="action-btn">Sell</button>
+        </div>
+    </div>
+</body>
+</html>

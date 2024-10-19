@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logs Analysis</title>
+    <link rel="icon" href="data-report-svgrepo-com.svg" type="image/x-icon">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        .chart-container {
+            display: flex;
+            justify-content: flex-start;
+            align-items: flex-start;
+            margin-bottom: 40px;
+            margin-left: 300px; /* 将容器靠右 */
+            gap: 200px;
+        }
+        .chart-box {
+            width: 30%; /* 控制图表大小 */
+        }
+        canvas {
+            width: 100%;
+            height: 300px; /* 控制图表高度 */
+        }
+        .data-list {
+            margin-top: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+
+        h1 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 20px;
+    font-family: 'Segoe UI';
+    font-size: 36px;
+    font-weight: bold;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); /* 添加阴影 */
+}
+
+        h2{
+            text-align: center;
+        }
+
+    </style>
+</head>
+<body>
+
+    <h1>Logs Analysis</h1>
+
+    <div class="chart-container">
+        <!-- Pie Chart -->
+        <div class="chart-box">
+            <h2>🔘 Event Distribution</h2>
+            <canvas id="eventPieChart"></canvas>
+        </div>
+
+        <!-- Bar Chart --> 
+        <div class="chart-box">
+            <h2>🔘 Login Attempts per IP</h2>
+            <canvas id="ipBarChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Data List -->
+    <div class="data-list">
+        <h2>🔍️ Detailed Data</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>No</th>
+                    <th>Time</th>
+                    <th>Event</th>
+                    <th>Catch</th>
+                    <th>IP</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="data-table-body">
+                <!-- 动态填充数据 -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        // 获取数据
+        fetch('http://localhost:8000/get-logs.php')
+            .then(response => response.json())
+            .then(data => {
+                // 准备数据
+                const eventCounts = {};
+                const ipCounts = {};
+
+                // 填充表格
+                const tableBody = document.getElementById('data-table-body');
+                data.forEach(log => {
+                    // 事件统计
+                    if (eventCounts[log.Event]) {
+                        eventCounts[log.Event]++;
+                    } else {
+                        eventCounts[log.Event] = 1;
+                    }
+
+                    // IP统计
+                    if (ipCounts[log.IP]) {
+                        ipCounts[log.IP]++;
+                    } else {
+                        ipCounts[log.IP] = 1;
+                    }
+
+                    // 将每条日志插入表格
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${log.No}</td>
+                        <td>${log.Time}</td>
+                        <td>${log.Event}</td>
+                        <td>${log.Catch}</td>
+                        <td>${log.IP}</td>
+                        <td>${log.Status}</td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+
+                // Pie Chart - Event Distribution
+                const eventPieCtx = document.getElementById('eventPieChart').getContext('2d');
+                new Chart(eventPieCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: Object.keys(eventCounts), // event name
+                        datasets: [{
+                            data: Object.values(eventCounts), // accumulate
+                            backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'],
+                            hoverBackgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'top'
+                            },
+                            title: {
+                                display: true,
+                                text: 'Event Distribution'
+                            }
+                        }
+                    }
+                });
+
+                // Bar Chart - Login Attempts per IP
+                const ipBarCtx = document.getElementById('ipBarChart').getContext('2d');
+                new Chart(ipBarCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: Object.keys(ipCounts), // IP address
+                        datasets: [{
+                            label: 'Login Attempts',
+                            data: Object.values(ipCounts), // IP try calculate
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            title: {
+                                display: true,
+                                text: 'Login Attempts per IP'
+                            }
+                        }
+                    }
+                });
+            })
+            .catch(error => console.error('Error fetching logs:', error));
+    </script>
+
+</body>
+</html>

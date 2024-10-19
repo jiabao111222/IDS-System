@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Log Page</title>
+    <link rel="icon" href="admin-1-svgrepo-com.svg" type="image/x-icon">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #000000;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+            font-family: 'Segoe UI';
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); 
+        }
+        .buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .button {
+            width: 48%;
+            padding: 10px;
+            font-size: 16px;
+            color: white;
+            background-color: #4CAF50;
+            border: none;
+            border-radius: 4px;
+            text-align: center;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .button:hover {
+            background-color: #45a049;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        tr:hover {
+            background-color: #ddd;
+        }
+        .status-success {
+            color: green;
+            font-weight: bold;
+        }
+        .status-fail {
+            color: red;
+            font-weight: bold;
+        }
+        #lottie-animation {
+            width: 30px;
+            height: 50px;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>📁 Error Logs</h1>
+    <div style="display: flex; align-items: center; justify-content: flex-end;">
+        <div style="color: gray; font-style: italic;">*Logs auto-refresh every 5 seconds in real-time</div>
+        <div id="lottie-animation"></div>
+    </div>
+    
+    <!-- Buttons Row -->
+    <div class="buttons">
+        <button class="button" onclick="fetchLogs()">Refresh Logs</button>
+        <button class="button" onclick="window.location.href='charttest.html'">View Analysis Report</button>
+    </div>
+    
+    <!-- Logs Table -->
+    <table id="logsTable">
+        <thead>
+            <tr>
+                <th>No</th>
+                <th>Time</th>
+                <th>Event</th>
+                <th>Catch</th>
+                <th>IP</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Log rows will be inserted here dynamically -->
+        </tbody>
+    </table>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.9.4/lottie.min.js"></script>
+<script>
+// 初始化 Lottie 动画
+var animation = lottie.loadAnimation({
+    container: document.getElementById('lottie-animation'),
+    renderer: 'svg',
+    loop: true,
+    autoplay: true,
+    path: 'Animation - 1725918594300.json' // 替换为你的 Lottie 动画路径
+});
+
+// Example function to fetch logs from the server
+function fetchLogs() {
+    fetch('http://localhost:8000/get-logs.php')
+        .then(response => response.json())
+        .then(data => {
+            console.log('Fetched Data:', data);
+            if (Array.isArray(data)) {
+                const tableBody = document.getElementById('logsTable').getElementsByTagName('tbody')[0];
+                tableBody.innerHTML = ''; 
+
+                data.forEach((log, index) => {
+                    const row = document.createElement('tr');
+
+                    const noCell = document.createElement('td');
+                    noCell.textContent = log.No; 
+                    row.appendChild(noCell);
+
+                    const timeCell = document.createElement('td');
+                    timeCell.textContent = log.Time;
+                    row.appendChild(timeCell);
+
+                    const eventCell = document.createElement('td');
+                    eventCell.textContent = log.Event;
+                    row.appendChild(eventCell);
+
+                    const catchCell = document.createElement('td');
+                    catchCell.textContent = log.Catch;
+                    row.appendChild(catchCell);
+
+                    const ipCell = document.createElement('td');
+                    ipCell.textContent = log.IP;
+                    row.appendChild(ipCell);
+
+                    const statusCell = document.createElement('td');
+                    statusCell.textContent = log.Status;
+                    statusCell.className = log.Status === 'success' ? 'status-success' : 'status-fail';
+                    row.appendChild(statusCell);
+
+                    tableBody.appendChild(row);
+                });
+            } else {
+                console.error('Data is not an array:', data);
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching logs:', error);
+        });
+}
+
+// Initial fetch of logs when the page loads
+fetchLogs();
+
+// Automatic refresh every 5 seconds
+setInterval(fetchLogs, 5000);
+
+</script>
+
+</body>
+</html>

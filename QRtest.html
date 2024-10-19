@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code Decoder</title>
+    <link rel="icon" href="qr-reader-svgrepo-com.svg" type="image/x-icon">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #000000;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        input[type="file"] {
+            display: block;
+            margin: 20px auto;
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            color: white;
+            background-color: #4CAF50;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .message {
+            text-align: center;
+            font-size: 16px;
+            color: #555;
+            margin-top: 20px;
+        }
+
+        h1{
+            font-family: 'Segoe UI';
+            text-align: center;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); 
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Upload QR Code</h1>
+    <input type="file" id="qr-upload" accept="image/*">
+    <button id="submit">Submit</button>
+    <p class="message" id="message">Please upload a QR code.</p>
+</div>
+
+<script>
+document.getElementById('submit').addEventListener('click', async function() {
+    var fileInput = document.getElementById('qr-upload');
+    var file = fileInput.files[0];
+
+    if (!file) {
+        document.getElementById('message').textContent = 'Please upload a QR code.';
+        return;
+    }
+
+    var formData = new FormData();
+    formData.append('file', file);
+
+    document.getElementById('message').textContent = 'Processing...';
+
+    try {
+        let response = await fetch('https://api.qrserver.com/v1/read-qr-code/', {
+            method: 'POST',
+            body: formData
+        });
+
+        let result = await response.json();
+        console.log('QR Code Decode Result:', result); // Log the result to console
+
+        if (result[0] && result[0].symbol && result[0].symbol[0] && result[0].symbol[0].data) {
+            let decodedData = result[0].symbol[0].data;
+            console.log('Decoded Data:', decodedData); // Log decoded data to console
+
+            let phpResponse = await fetch('http://localhost:8000/Qrtest.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ decodedData: decodedData })
+            });
+
+            let phpResult = await phpResponse.json();
+            console.log('PHP Result:', phpResult); // Log PHP result to console
+
+            if (phpResult.success) {
+                document.getElementById('message').textContent = 'Message from PHP: ' + phpResult.message;
+            } else {
+                document.getElementById('message').textContent = 'Error from PHP: ' + phpResult.error;
+            }
+        } else {
+            document.getElementById('message').textContent = 'Error decoding QR code.';
+        }
+    } catch (error) {
+        console.error('Error:', error); // Log errors to console
+        document.getElementById('message').textContent = 'Error: ' + error.message;
+    }
+});
+</script>
+
+</body>
+</html>
